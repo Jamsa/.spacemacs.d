@@ -32,7 +32,8 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(lua
+   '(yaml
+     lua
      nginx
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
@@ -46,13 +47,14 @@ This function should only modify configuration layer settings."
      git
      ;;helm
      osx
-     ivy
-     lsp
+     ;;ivy
+     (lsp :variables lsp-rust-server 'rust-analyzer)
      markdown
      multiple-cursors
-     go
+     (go :variables go-tab-width 4)
      rust
      python
+     (conda :variables conda-anaconda-home "/usr/local/Caskroom/miniconda/base/")
      html
      (node :variables node-add-modules-path t)
      (javascript :variables javascript-backend 'lsp javascript-lsp-linter nil)
@@ -65,7 +67,7 @@ This function should only modify configuration layer settings."
      ;;        shell-default-position 'bottom)
      ;; spell-checking
      syntax-checking
-     treemacs
+     ;; treemacs
      )
 
    ;; List of additional packages that will be installed without being
@@ -163,7 +165,7 @@ It should only modify the values of Spacemacs settings."
    ;; with `:variables' keyword (similar to layers). Check the editing styles
    ;; section of the documentation for details on available variables.
    ;; (default 'vim)
-   dotspacemacs-editing-style 'vim
+   dotspacemacs-editing-style 'emacs
 
    ;; Specify the startup banner. Default value is `official', it displays
    ;; the official spacemacs logo. An integer value is the index of text
@@ -509,16 +511,33 @@ configuration.
 It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
 
-  (setq configuration-layer--elpa-archives
+  (setq configuration-layer-elpa-archives
 	'(("melpa-cn" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
 	  ("org-cn"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")
 	  ("gnu-cn"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")))
+
+  ;; (setq configuration-layer-elpa-archives
+  ;;       '(("melpa-cn" . "http://elpa.emacs-china.org/melpa/")
+  ;;         ("org-cn"   . "http://elpa.emacs-china.org/org/")
+  ;;         ("gnu-cn"   . "http://elpa.emacs-china.org/gnu/")))
+
+  ;; (setq configuration-layer-elpa-archives
+  ;;       '(("melpa-cn" . "http://mirrors.ustc.edu.cn/elpa/melpa/")
+  ;;         ("org-cn"   . "http://mirrors.ustc.edu.cn/elpa/org/")
+  ;;         ("gnu-cn"   . "http://mirrors.ustc.edu.cn/elpa/gnu/")))
 
   (if window-system
       (progn
         (add-hook 'after-init-hook 'load-framegeometry)
         (add-hook 'kill-emacs-hook 'save-framegeometry))
     )
+
+  ;; 添加node工具
+  (add-to-list 'exec-path "/Users/zhujie/Development/devel/nodejs/emacs-node-tools/node_modules/.bin" t)
+
+  ;; 不记录目录的历史
+  ;; (eval-after-load 'recentf-mode
+  ;;   (add-to-list 'recentf-exclude "/Users/zhujie/Documents/diaries/"))
   )
 
 (defun dotspacemacs/user-load ()
@@ -557,6 +576,37 @@ before packages are loaded."
   ;;   (setq face-font-rescale-alist '(("STHeiti" . 1.2)))    ;中文字体缩放，处理中英文等宽问题
   ;;   ;; 新建Frame的默认字体
   ;;   (add-to-list 'default-frame-alist '(font . "Monaco 14")))
+
+  ;; 自动退出lsp进程
+  (setq lsp-keep-workspace-alive nil)
+  ;; 防自动退出
+  (setq confirm-kill-emacs 'y-or-n-p)
+
+  ;; projectile
+  ;;(with-eval-after-load 'projectile-mode
+    (add-to-list 'projectile-globally-ignored-directories "*node_modules")
+    (add-to-list 'projectile-globally-ignored-directories "node_modules")
+    (add-to-list 'projectile-globally-ignored-file-suffixes '(".pyc"))
+    ;;)
+
+  ;; web
+  (setq-default
+   ;; js2-mode
+   js2-basic-offset 2
+   ;; web-mode
+   css-indent-offset 2
+   web-mode-markup-indent-offset 2
+   web-mode-css-indent-offset 2
+   web-mode-code-indent-offset 2
+   web-mode-attr-indent-offset 2)
+
+  (with-eval-after-load 'web-mode
+    (add-to-list 'web-mode-indentation-params '("lineup-args" . nil))
+    (add-to-list 'web-mode-indentation-params '("lineup-concats" . nil))
+    (add-to-list 'web-mode-indentation-params '("lineup-calls" . nil)))
+
+  ;; rust
+  (setq rust-format-on-save t)
 
   ;; GPG的处理
   ;; 密码提示
@@ -611,7 +661,9 @@ This function is called at the very end of Spacemacs initialization."
    "/Users/zhujie/Documents/eclipse-projects/works/jreap/fssc/frontend/node_modules/.bin/eslint")
  '(helm-completion-style 'emacs)
  '(package-selected-packages
-   '(company-quickhelp git-gutter-fringe+ fringe-helper git-gutter+ browse-at-remote rjsx-mode reveal-in-osx-finder osx-trash osx-dictionary osx-clipboard launchctl add-node-modules-path wgrep smex lsp-ivy ivy-yasnippet ivy-xref ivy-purpose ivy-hydra ivy-avy counsel-projectile counsel-css helm-gtags ggtags counsel-gtags counsel swiper ivy company-lua lua-mode nginx-mode treemacs-evil web-mode tagedit slim-mode scss-mode sass-mode pug-mode impatient-mode htmlize helm-css-scss haml-mode emmet-mode company-web web-completion-data yasnippet-snippets unfill treemacs-magit smeargle mwim mmm-mode markdown-toc magit-svn magit-section magit-gitflow magit-popup lsp-ui lsp-treemacs helm-lsp helm-gitignore helm-git-grep helm-company helm-c-yasnippet gitignore-templates gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy flycheck-pos-tip pos-tip evil-magit magit git-commit with-editor transient company-lsp lsp-mode markdown-mode dash-functional company auto-yasnippet yasnippet ac-ispell auto-complete ws-butler writeroom-mode visual-fill-column winum volatile-highlights vi-tilde-fringe uuidgen treemacs-projectile treemacs-persp treemacs ht pfuture toc-org symon symbol-overlay string-inflection spaceline-all-the-icons all-the-icons memoize spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode password-generator paradox spinner overseer org-bullets open-junk-file nameless move-text macrostep lorem-ipsum link-hint indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-xref helm-themes helm-swoop helm-purpose window-purpose imenu-list helm-projectile projectile helm-mode-manager helm-make helm-ls-git helm-flx helm-descbinds helm-ag google-translate golden-ratio flycheck-package package-lint flycheck pkg-info epl let-alist flycheck-elsa flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-surround evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state iedit evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens smartparens paredit evil-args evil-anzu anzu eval-sexp-fu elisp-slime-nav editorconfig dumb-jump f dash s devdocs define-word column-enforce-mode clean-aindent-mode centered-cursor-mode auto-highlight-symbol auto-compile packed aggressive-indent ace-window ace-link ace-jump-helm-line helm avy helm-core popup which-key use-package pcre2el org-plus-contrib hydra lv hybrid-mode font-lock+ evil goto-chg undo-tree dotenv-mode diminish bind-map bind-key async)))
+   '(dap-mode bui yaml-mode tide company-quickhelp git-gutter-fringe+ fringe-helper git-gutter+ browse-at-remote rjsx-mode reveal-in-osx-finder osx-trash osx-dictionary osx-clipboard launchctl add-node-modules-path wgrep smex lsp-ivy ivy-yasnippet ivy-xref ivy-purpose ivy-hydra ivy-avy counsel-projectile counsel-css helm-gtags ggtags counsel-gtags counsel swiper ivy company-lua lua-mode nginx-mode treemacs-evil web-mode tagedit slim-mode scss-mode sass-mode pug-mode impatient-mode htmlize helm-css-scss haml-mode emmet-mode company-web web-completion-data yasnippet-snippets unfill treemacs-magit smeargle mwim mmm-mode markdown-toc magit-svn magit-section magit-gitflow magit-popup lsp-ui lsp-treemacs helm-lsp helm-gitignore helm-git-grep helm-company helm-c-yasnippet gitignore-templates gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy flycheck-pos-tip pos-tip evil-magit magit git-commit with-editor transient company-lsp lsp-mode markdown-mode dash-functional company auto-yasnippet yasnippet ac-ispell auto-complete ws-butler writeroom-mode visual-fill-column winum volatile-highlights vi-tilde-fringe uuidgen treemacs-projectile treemacs-persp treemacs ht pfuture toc-org symon symbol-overlay string-inflection spaceline-all-the-icons all-the-icons memoize spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode password-generator paradox spinner overseer org-bullets open-junk-file nameless move-text macrostep lorem-ipsum link-hint indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-xref helm-themes helm-swoop helm-purpose window-purpose imenu-list helm-projectile projectile helm-mode-manager helm-make helm-ls-git helm-flx helm-descbinds helm-ag google-translate golden-ratio flycheck-package package-lint flycheck pkg-info epl let-alist flycheck-elsa flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-surround evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state iedit evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens smartparens paredit evil-args evil-anzu anzu eval-sexp-fu elisp-slime-nav editorconfig dumb-jump f dash s devdocs define-word column-enforce-mode clean-aindent-mode centered-cursor-mode auto-highlight-symbol auto-compile packed aggressive-indent ace-window ace-link ace-jump-helm-line helm avy helm-core popup which-key use-package pcre2el org-plus-contrib hydra lv hybrid-mode font-lock+ evil goto-chg undo-tree dotenv-mode diminish bind-map bind-key async))
+ '(projectile-globally-ignored-directories
+   '(".idea" ".vscode" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" ".ccls-cache" ".cache" ".clangd" "node_modules" "*node_modules")))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
