@@ -51,6 +51,7 @@ This function should only modify configuration layer settings."
      (lsp :variables lsp-rust-server 'rust-analyzer)
      markdown
      multiple-cursors
+     dap
      (go :variables go-tab-width 4)
      rust
      python
@@ -511,15 +512,24 @@ configuration.
 It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
 
-  (setq configuration-layer-elpa-archives
-	'(("melpa-cn" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
-	  ("org-cn"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")
-	  ("gnu-cn"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")))
+;; (setq url-proxy-services
+;;       '(("no_proxy" . "^\\(localhost\\|10.*\\)")
+;;         ("http" . "127.0.0.1:7890")
+;;         ("https" . "127.0.0.1:7890")))
+;; (setq url-http-proxy-basic-auth-storage
+;;       (list (list "http://proxy.com:8080"
+;;                   (cons "Input your LDAP UID !"
+;;                         (base64-encode-string "LOGIN:PASSWORD")))))
 
   ;; (setq configuration-layer-elpa-archives
-  ;;       '(("melpa-cn" . "http://elpa.emacs-china.org/melpa/")
-  ;;         ("org-cn"   . "http://elpa.emacs-china.org/org/")
-  ;;         ("gnu-cn"   . "http://elpa.emacs-china.org/gnu/")))
+	;; '(("melpa-cn" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
+	;;   ("org-cn"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")
+	;;   ("gnu-cn"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")))
+
+  (setq configuration-layer-elpa-archives
+        '(("melpa-cn" . "http://elpa.emacs-china.org/melpa/")
+          ("org-cn"   . "http://elpa.emacs-china.org/org/")
+          ("gnu-cn"   . "http://elpa.emacs-china.org/gnu/")))
 
   ;; (setq configuration-layer-elpa-archives
   ;;       '(("melpa-cn" . "http://mirrors.ustc.edu.cn/elpa/melpa/")
@@ -583,11 +593,11 @@ before packages are loaded."
   (setq confirm-kill-emacs 'y-or-n-p)
 
   ;; projectile
-  ;;(with-eval-after-load 'projectile-mode
+  (with-eval-after-load 'projectile-mode
     (add-to-list 'projectile-globally-ignored-directories "*node_modules")
     (add-to-list 'projectile-globally-ignored-directories "node_modules")
     (add-to-list 'projectile-globally-ignored-file-suffixes '(".pyc"))
-    ;;)
+    )
 
   ;; web
   (setq-default
@@ -598,7 +608,25 @@ before packages are loaded."
    web-mode-markup-indent-offset 2
    web-mode-css-indent-offset 2
    web-mode-code-indent-offset 2
-   web-mode-attr-indent-offset 2)
+   web-mode-attr-indent-offset 2
+   js2-strict-missing-semi-warning nil
+   ;; js2-missing-semi-one-line-override t
+   )
+
+    ;; (defun my-setup-indent (n)
+    ;;   ;; java/c/c++
+    ;;   (setq c-basic-offset n)
+    ;;   ;; web development
+    ;;   (setq coffee-tab-width n) ; coffeescript
+    ;;   (setq javascript-indent-level n) ; javascript-mode
+    ;;   (setq js-indent-level n) ; js-mode
+    ;;   (setq js2-basic-offset n) ; js2-mode, in latest js2-mode, it's alias of js-indent-level
+    ;;   (setq web-mode-markup-indent-offset n) ; web-mode, html tag in html file
+    ;;   (setq web-mode-css-indent-offset n) ; web-mode, css in html file
+    ;;   (setq web-mode-code-indent-offset n) ; web-mode, js code in html file
+    ;;   (setq css-indent-offset n) ; css-mode
+    ;;   )
+    ;; (my-setup-indent 2)
 
   (with-eval-after-load 'web-mode
     (add-to-list 'web-mode-indentation-params '("lineup-args" . nil))
@@ -621,7 +649,7 @@ before packages are loaded."
 
   ;; .asc和.gpg自动保存为文本文件
   ;; https://unix.stackexchange.com/questions/55354/how-to-use-emacs-to-recognize-and-automatically-open-gpg-encrypted-file-in-ascii
-  (epa-file-enable)
+  ;; (epa-file-enable)
 
   (setq epa-file-name-regexp "\\.\\(gpg\\|\\asc\\)\\(~\\|\\.~[0-9]+~\\)?\\'")
   (epa-file-name-regexp-update)
@@ -642,6 +670,18 @@ before packages are loaded."
 
   (add-to-list 'auto-mode-alist '("\\.asc$" . auto-encryption-armored-mode))
 
+  ;; rust dap 调试
+  ;; 缺少lldb-mi，编译或通过vscode的cpp工具集安装
+  ;; https://robert.kra.hn/posts/2021-02-07_rust-with-emacs/#debugging
+  ;; (dap-register-debug-template
+  ;;  "Rust::LLDB Run Configuration"
+  ;;  (list :type "lldb"
+  ;;        :request "launch"
+  ;;        :name "LLDB::Run"
+	;;        :gdbpath "rust-lldb"
+  ;;        :target nil
+  ;;        :cwd nil))
+
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -657,8 +697,8 @@ This function is called at the very end of Spacemacs initialization."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(evil-want-Y-yank-to-eol nil)
- '(flycheck-javascript-eslint-executable
-   "/Users/zhujie/Documents/eclipse-projects/works/jreap/fssc/frontend/node_modules/.bin/eslint")
+ ;; '(flycheck-javascript-eslint-executable
+ ;;   "/Users/zhujie/Documents/eclipse-projects/works/jreap/fssc/frontend/node_modules/.bin/eslint")
  '(helm-completion-style 'emacs)
  '(package-selected-packages
    '(dap-mode bui yaml-mode tide company-quickhelp git-gutter-fringe+ fringe-helper git-gutter+ browse-at-remote rjsx-mode reveal-in-osx-finder osx-trash osx-dictionary osx-clipboard launchctl add-node-modules-path wgrep smex lsp-ivy ivy-yasnippet ivy-xref ivy-purpose ivy-hydra ivy-avy counsel-projectile counsel-css helm-gtags ggtags counsel-gtags counsel swiper ivy company-lua lua-mode nginx-mode treemacs-evil web-mode tagedit slim-mode scss-mode sass-mode pug-mode impatient-mode htmlize helm-css-scss haml-mode emmet-mode company-web web-completion-data yasnippet-snippets unfill treemacs-magit smeargle mwim mmm-mode markdown-toc magit-svn magit-section magit-gitflow magit-popup lsp-ui lsp-treemacs helm-lsp helm-gitignore helm-git-grep helm-company helm-c-yasnippet gitignore-templates gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy flycheck-pos-tip pos-tip evil-magit magit git-commit with-editor transient company-lsp lsp-mode markdown-mode dash-functional company auto-yasnippet yasnippet ac-ispell auto-complete ws-butler writeroom-mode visual-fill-column winum volatile-highlights vi-tilde-fringe uuidgen treemacs-projectile treemacs-persp treemacs ht pfuture toc-org symon symbol-overlay string-inflection spaceline-all-the-icons all-the-icons memoize spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode password-generator paradox spinner overseer org-bullets open-junk-file nameless move-text macrostep lorem-ipsum link-hint indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-xref helm-themes helm-swoop helm-purpose window-purpose imenu-list helm-projectile projectile helm-mode-manager helm-make helm-ls-git helm-flx helm-descbinds helm-ag google-translate golden-ratio flycheck-package package-lint flycheck pkg-info epl let-alist flycheck-elsa flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-surround evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state iedit evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens smartparens paredit evil-args evil-anzu anzu eval-sexp-fu elisp-slime-nav editorconfig dumb-jump f dash s devdocs define-word column-enforce-mode clean-aindent-mode centered-cursor-mode auto-highlight-symbol auto-compile packed aggressive-indent ace-window ace-link ace-jump-helm-line helm avy helm-core popup which-key use-package pcre2el org-plus-contrib hydra lv hybrid-mode font-lock+ evil goto-chg undo-tree dotenv-mode diminish bind-map bind-key async))
